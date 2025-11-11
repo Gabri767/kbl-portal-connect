@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
+import logoKbl from '@/assets/logo-kbl.png';
 
 export default function Login() {
   const { login, register } = useAuth();
@@ -29,6 +30,9 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="flex justify-center mb-4">
+            <img src={logoKbl} alt="Logo KBL" className="h-24 w-auto" />
+          </div>
           <CardTitle className="text-2xl text-center text-accent">Portal KBL</CardTitle>
           <CardDescription className="text-center">
             Sistema de Gestão Contábil
