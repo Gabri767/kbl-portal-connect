@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
 
 export default function Login() {
   const { login, register } = useAuth();
@@ -98,8 +99,9 @@ export default function Login() {
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={8}
                   />
+                  <PasswordStrengthIndicator password={registerPassword} />
                 </div>
                 <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
                   Cadastrar
