@@ -1,7 +1,48 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.2.4/mod.ts'
 import { create } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
+
+// Helper function to verify password using Web Crypto API
+async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  const [saltHex, hashHex] = storedHash.split(':')
+  
+  const salt = new Uint8Array(saltHex.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+  const storedHashBytes = new Uint8Array(hashHex.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+  
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password)
+  
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    data,
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  )
+  
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  )
+  
+  const derivedArray = new Uint8Array(derivedBits)
+  
+  // Constant-time comparison
+  if (derivedArray.length !== storedHashBytes.length) return false
+  
+  let diff = 0
+  for (let i = 0; i < derivedArray.length; i++) {
+    diff |= derivedArray[i] ^ storedHashBytes[i]
+  }
+  
+  return diff === 0
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -54,7 +95,7 @@ serve(async (req) => {
     }
 
     // Verify password
-    const passwordMatch = await bcrypt.compare(password, user.senha_hash)
+    const passwordMatch = await verifyPassword(password, user.senha_hash)
 
     if (!passwordMatch) {
       // Increment failed attempts
