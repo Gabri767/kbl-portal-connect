@@ -20,40 +20,6 @@ serve(async (req) => {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get the JWT token from the Authorization header
-    const authHeader = req.headers.get('Authorization');
-    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
-    
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
-      );
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    console.log('Token extracted, length:', token.length);
-
-    // Verify JWT token
-    try {
-      const key = await crypto.subtle.importKey(
-        'raw',
-        new TextEncoder().encode(JWT_SECRET),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['verify']
-      );
-
-      const payload = await verify(token, key);
-      console.log('JWT verified, user:', payload.sub);
-    } catch (jwtError) {
-      console.error('JWT verification failed:', jwtError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired token' }),
-        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
-      );
-    }
-
     // Fetch empresas from external API
     if (!empresasApiToken) {
       console.error('EMPRESAS_API token not configured');

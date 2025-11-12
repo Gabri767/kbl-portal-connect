@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,25 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ThemeToggle from "@/components/ThemeToggle";
 import logoKbl from "@/assets/logo-kbl.png";
+import logoKblBranco from "@/assets/logo-kbl-branco.png";
 
 export default function Login() {
   const { login } = useAuth();
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkTheme();
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +40,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            <img src={logoKbl} alt="Logo KBL" className="h-24 w-auto" />
+            <img src={isDark ? logoKblBranco : logoKbl} alt="Logo KBL" className="h-24 w-auto" />
           </div>
           <CardTitle className="text-2xl text-center text-accent">Portal KBL</CardTitle>
           <CardDescription className="text-primary text-center">Sistema de Gestão Contábil</CardDescription>
