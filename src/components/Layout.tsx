@@ -14,8 +14,8 @@ export function Layout({ children }: LayoutProps) {
       <SidebarInset>
         <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger />
-          <ThemeToggle />
           <div className="flex-1" />
+          <ThemeToggle />
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
