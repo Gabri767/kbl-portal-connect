@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
-import { Resend } from 'npm:resend@2.0.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,7 +8,6 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,7 +16,6 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
     // Get the JWT token from the Authorization header
     const authHeader = req.headers.get('Authorization');
@@ -121,30 +118,10 @@ serve(async (req) => {
       detalhe: { email, role, convidado_por: user.email },
     });
 
-    // Send invitation email
+    // Generate invitation link (email sending to be implemented separately)
     const inviteLink = `${req.headers.get('origin')}/definir-senha/${conviteToken}`;
 
-    if (resend) {
-      try {
-        await resend.emails.send({
-          from: 'Portal KBL <onboarding@resend.dev>',
-          to: [email],
-          subject: 'Convite para Portal KBL',
-          html: `
-            <h1>Você foi convidado para o Portal KBL!</h1>
-            <p>Olá ${nome},</p>
-            <p>Você foi convidado para fazer parte do Portal KBL com o cargo de <strong>${role}</strong>.</p>
-            <p>Para ativar sua conta e definir sua senha, clique no link abaixo:</p>
-            <p><a href="${inviteLink}" style="background: #720707; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Definir Senha</a></p>
-            <p>Este convite expira em 48 horas.</p>
-            <p>Equipe Portal KBL</p>
-          `,
-        });
-      } catch (emailError) {
-        console.error('Error sending email:', emailError);
-        // Don't fail the invite if email fails
-      }
-    }
+    console.log(`Invite link for ${email}: ${inviteLink}`);
 
     return new Response(
       JSON.stringify({ 

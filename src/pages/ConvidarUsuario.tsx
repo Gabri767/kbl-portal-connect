@@ -39,14 +39,15 @@ export default function ConvidarUsuario() {
 
   const fetchEmpresas = async () => {
     try {
-      const { data, error } = await supabase
-        .from('empresas')
-        .select('id, razao_social, apelido_continuo')
-        .eq('ativa', true)
-        .order('razao_social');
+      const token = localStorage.getItem('auth_token');
+      const { data, error } = await supabase.functions.invoke('empresas-sync', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (error) throw error;
-      setEmpresasList(data || []);
+      setEmpresasList(data?.empresas || []);
     } catch (error: any) {
       console.error('Error fetching empresas:', error);
     }
@@ -230,8 +231,14 @@ export default function ConvidarUsuario() {
                         checked={empresas.includes(empresa.id)}
                         onCheckedChange={() => handleEmpresaToggle(empresa.id)}
                       />
-                      <Label htmlFor={empresa.id} className="cursor-pointer">
-                        {empresa.apelido_continuo || empresa.razao_social}
+                      <Label htmlFor={empresa.id} className="cursor-pointer flex-1">
+                        <div>
+                          <div className="font-medium">{empresa.razao_social}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {empresa.cnpj}
+                            {empresa.apelido_continuo && ` • ${empresa.apelido_continuo}`}
+                          </div>
+                        </div>
                       </Label>
                     </div>
                   ))}

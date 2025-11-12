@@ -16,14 +16,15 @@ export default function Empresas() {
 
   const fetchEmpresas = async () => {
     try {
-      const { data, error } = await supabase
-        .from('empresas')
-        .select('*')
-        .eq('ativa', true)
-        .order('razao_social');
+      const token = localStorage.getItem('auth_token');
+      const { data, error } = await supabase.functions.invoke('empresas-sync', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (error) throw error;
-      setEmpresas(data || []);
+      setEmpresas(data?.empresas || []);
     } catch (error: any) {
       toast({
         title: 'Erro',
