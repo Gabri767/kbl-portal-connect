@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
+import { verify } from 'https://deno.land/x/djwt@v3.0.1/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,6 +9,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const JWT_SECRET = Deno.env.get('JWT_SECRET') || 'your-secret-key-change-this';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -20,14 +22,47 @@ serve(async (req) => {
     // Get the JWT token from the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !user) {
-      throw new Error('Unauthorized');
+    // Verify JWT token
+    let userId: string;
+    try {
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(JWT_SECRET),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['verify']
+      );
+
+      const payload = await verify(token, key);
+      userId = payload.sub as string;
+    } catch (jwtError) {
+      console.error('JWT verification failed:', jwtError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Get user details
+    const { data: user, error: userError } = await supabase
+      .from('usuarios')
+      .select('id, email')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
 
     // Check if user has permission (admin or gestor)
