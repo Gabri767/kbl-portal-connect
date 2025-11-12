@@ -12,7 +12,7 @@ export function Layout({ children }: LayoutProps) {
     <SidebarProvider defaultOpen>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+        <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 justify-content-between">
           <SidebarTrigger />
           <ThemeToggle />
           <div className="flex-1" />
