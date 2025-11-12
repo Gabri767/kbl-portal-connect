@@ -201,6 +201,8 @@ export type Database = {
       usuarios: {
         Row: {
           bloqueado_until: string | null
+          convite_expires_at: string | null
+          convite_token: string | null
           criado_em: string | null
           departamentos: string[] | null
           email: string
@@ -210,10 +212,13 @@ export type Database = {
           mfa_secret: string | null
           nome: string
           senha_hash: string
+          status: string | null
           tentativas_login: number | null
         }
         Insert: {
           bloqueado_until?: string | null
+          convite_expires_at?: string | null
+          convite_token?: string | null
           criado_em?: string | null
           departamentos?: string[] | null
           email: string
@@ -223,10 +228,13 @@ export type Database = {
           mfa_secret?: string | null
           nome: string
           senha_hash: string
+          status?: string | null
           tentativas_login?: number | null
         }
         Update: {
           bloqueado_until?: string | null
+          convite_expires_at?: string | null
+          convite_token?: string | null
           criado_em?: string | null
           departamentos?: string[] | null
           email?: string
@@ -236,6 +244,7 @@ export type Database = {
           mfa_secret?: string | null
           nome?: string
           senha_hash?: string
+          status?: string | null
           tentativas_login?: number | null
         }
         Relationships: [
@@ -244,6 +253,36 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios_empresas: {
+        Row: {
+          empresa_id: string
+          usuario_id: string
+        }
+        Insert: {
+          empresa_id: string
+          usuario_id: string
+        }
+        Update: {
+          empresa_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_empresas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuarios_empresas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]

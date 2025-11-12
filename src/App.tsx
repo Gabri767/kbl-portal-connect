@@ -11,6 +11,9 @@ import Empresas from "./pages/Empresas";
 import Lancamentos from "./pages/Lancamentos";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
+import Usuarios from "./pages/Usuarios";
+import ConvidarUsuario from "./pages/ConvidarUsuario";
+import DefinirSenha from "./pages/DefinirSenha";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 const ProtectedRoute = ({
@@ -40,12 +43,15 @@ const App = () => <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} className="bg-red-950" />
+            <Route path="/login" element={<Login />} />
+            <Route path="/definir-senha/:token" element={<DefinirSenha />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
             <Route path="/lancamentos" element={<ProtectedRoute><Lancamentos /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/usuarios" element={<ProtectedRoute><Usuarios /></ProtectedRoute>} />
+            <Route path="/usuarios/novo" element={<ProtectedRoute><ConvidarUsuario /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
