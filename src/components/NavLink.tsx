@@ -1,6 +1,7 @@
 import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
   className?: string;
@@ -19,6 +20,7 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
         }
         {...props}
       />
+      <ThemeToggle />
     );
   },
 );
