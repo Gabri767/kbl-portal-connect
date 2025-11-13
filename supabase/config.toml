@@ -16,4 +16,19 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.empresas-sync]
+verify_jwt = false
+
+[functions.empresas-create]
 verify_jwt = true
+
+[functions.empresas-update]
+verify_jwt = true
+
+[functions.empresas-delete]
+verify_jwt = true
+
+[functions.empresas-list]
+verify_jwt = true
+
+[functions.cep-lookup]
+verify_jwt = false
