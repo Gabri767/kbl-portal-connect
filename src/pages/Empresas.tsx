@@ -130,15 +130,13 @@ export default function Empresas() {
 
   const fetchEmpresas = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const { data, error } = await supabase.functions.invoke('empresas-list', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data, error } = await supabase
+        .from('empresas')
+        .select('*')
+        .order('razao_social');
 
       if (error) throw error;
-      setEmpresas(data?.data || []);
+      setEmpresas((data || []) as any);
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -151,18 +149,18 @@ export default function Empresas() {
   };
 
   const fetchRegimes = async () => {
-    const { data } = await supabase.from('regimes').select('nome').order('nome');
-    setRegimes(data?.map((r) => r.nome) || []);
+    const { data } = await (supabase as any).from('regimes').select('nome').order('nome');
+    setRegimes((data as any)?.map((r: any) => r.nome) || []);
   };
 
   const fetchGrupos = async () => {
-    const { data } = await supabase.from('grupo_de_empresas').select('nome').order('nome');
-    setGrupos(data?.map((g) => g.nome) || []);
+    const { data } = await (supabase as any).from('grupo_de_empresas').select('nome').order('nome');
+    setGrupos((data as any)?.map((g: any) => g.nome) || []);
   };
 
   const fetchTags = async () => {
-    const { data } = await supabase.from('tags').select('nome').order('nome');
-    setTagsList(data?.map((t) => t.nome) || []);
+    const { data } = await (supabase as any).from('tags').select('nome').order('nome');
+    setTagsList((data as any)?.map((t: any) => t.nome) || []);
   };
 
   const handleBuscarCep = async () => {
@@ -177,11 +175,6 @@ export default function Empresas() {
 
     setLoadingCep(true);
     try {
-      const { data, error } = await supabase.functions.invoke('cep-lookup', {
-        body: {},
-        method: 'GET',
-      });
-
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cep-lookup?cep=${formData.cep}`;
       const response = await fetch(url);
       const result = await response.json();
@@ -228,23 +221,34 @@ export default function Empresas() {
     }
 
     try {
-      const token = localStorage.getItem('auth_token');
-      const functionName = editingId ? 'empresas-update' : 'empresas-create';
-      const body = editingId ? { id: editingId, ...formData } : formData;
+      if (editingId) {
+        // Atualizar empresa existente
+        const { error } = await supabase
+          .from('empresas')
+          .update(formData)
+          .eq('id', editingId);
 
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body,
-      });
+        if (error) throw error;
 
-      if (error) throw error;
+        toast({
+          title: 'Sucesso',
+          description: 'Empresa atualizada com sucesso',
+        });
+      } else {
+        // Criar nova empresa
+        const dataToInsert: any = formData.id ? formData : { ...formData, id: undefined };
+        
+        const { error } = await supabase
+          .from('empresas')
+          .insert([dataToInsert]);
 
-      toast({
-        title: 'Sucesso',
-        description: editingId ? 'Empresa atualizada com sucesso' : 'Empresa criada com sucesso',
-      });
+        if (error) throw error;
+
+        toast({
+          title: 'Sucesso',
+          description: 'Empresa criada com sucesso',
+        });
+      }
 
       setDialogOpen(false);
       resetForm();
@@ -261,6 +265,7 @@ export default function Empresas() {
   const handleEdit = (empresa: Empresa) => {
     setEditingId(empresa.id);
     setFormData({
+      id: empresa.id,
       razao_social: empresa.razao_social || '',
       nome_fantasia: empresa.nome_fantasia || '',
       cnpj: empresa.cnpj || '',
@@ -325,6 +330,7 @@ export default function Empresas() {
   const resetForm = () => {
     setEditingId(null);
     setFormData({
+      id: '',
       razao_social: '',
       nome_fantasia: '',
       cnpj: '',
@@ -376,7 +382,7 @@ export default function Empresas() {
               resetForm();
               setDialogOpen(true);
             }}
-            className="text-primary"
+            className="text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nova Empresa
@@ -445,7 +451,6 @@ export default function Empresas() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEdit(empresa)}
-                            className="text-primary"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -478,6 +483,18 @@ export default function Empresas() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            {!editingId && (
+              <div className="space-y-2">
+                <Label htmlFor="id">ID Customizado (opcional)</Label>
+                <Input
+                  id="id"
+                  value={formData.id}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, id: e.target.value }))}
+                  placeholder="Deixe em branco para gerar automaticamente"
+                />
+              </div>
+            )}
+            
             {/* Dados Básicos */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Dados Básicos</h3>
@@ -619,7 +636,7 @@ export default function Empresas() {
                       variant="outline"
                       onClick={handleBuscarCep}
                       disabled={loadingCep}
-                      className="text-primary"
+                      className="text-white bg-primary hover:bg-primary/90"
                     >
                       {loadingCep ? 'Buscando...' : 'Buscar'}
                     </Button>
@@ -707,7 +724,7 @@ export default function Empresas() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSubmit} className="text-primary">
+            <Button onClick={handleSubmit} className="text-white">
               {editingId ? 'Atualizar' : 'Criar'} Empresa
             </Button>
           </DialogFooter>
