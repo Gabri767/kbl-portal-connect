@@ -47,6 +47,7 @@ interface Empresa {
 }
 
 interface FormData {
+  id?: string;
   razao_social: string;
   nome_fantasia: string;
   cnpj: string;
@@ -89,6 +90,7 @@ export default function Empresas() {
   const [tagsList, setTagsList] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
+    id: '',
     razao_social: '',
     nome_fantasia: '',
     cnpj: '',
