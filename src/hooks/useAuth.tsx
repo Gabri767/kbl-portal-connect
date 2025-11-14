@@ -69,8 +69,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (data.error) {
         toast({
-          title: 'Erro',
-          description: data.error,
+          title: 'Erro de Autenticação',
+          description: 'Credenciais inválidas. Verifique seu email e senha.',
           variant: 'destructive'
         });
         return;

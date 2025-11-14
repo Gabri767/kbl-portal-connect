@@ -151,6 +151,41 @@ export type Database = {
           },
         ]
       }
+      password_reset_tokens: {
+        Row: {
+          criado_em: string | null
+          expires_at: string
+          id: string
+          token_hash: string
+          usado: boolean | null
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string | null
+          expires_at: string
+          id?: string
+          token_hash: string
+          usado?: boolean | null
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string | null
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          usado?: boolean | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_reset_tokens_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regimes: {
         Row: {
           criado_em: string | null

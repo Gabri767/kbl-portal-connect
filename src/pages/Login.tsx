@@ -55,6 +55,7 @@ export default function Login() {
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
+                placeholder="seu@email.com"
               />
             </div>
             <div className="space-y-2">
@@ -65,11 +66,21 @@ export default function Login() {
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
+                placeholder="Digite sua senha"
               />
             </div>
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
+            <Button type="submit" className="w-full bg-brand hover:bg-brand/90">
               Entrar
             </Button>
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => window.location.href = '/recuperar-senha'}
+                className="text-sm text-primary hover:text-accent transition-colors"
+              >
+                Esqueci minha senha
+              </button>
+            </div>
           </form>
         </CardContent>
       </Card>

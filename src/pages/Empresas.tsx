@@ -121,7 +121,7 @@ export default function Empresas() {
   const fetchEmpresas = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("auth_token");
       if (!token) {
         toast.error("Sessão expirada. Faça login novamente.");
         navigate("/login");
