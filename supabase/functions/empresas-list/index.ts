@@ -7,6 +7,26 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const API_URL = 'http://markiiapi.sistemakbl.com:8424/api/dominio/empresas';
+
+// Função para fazer trim de strings em objetos
+function trimObjectStrings(obj: any): any {
+  if (typeof obj === 'string') {
+    return obj.trim();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(trimObjectStrings);
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const trimmed: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      trimmed[key] = trimObjectStrings(value);
+    }
+    return trimmed;
+  }
+  return obj;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -50,36 +70,73 @@ serve(async (req) => {
 
     console.log('Listando empresas para usuário:', payload.sub);
 
-    // Buscar empresas com joins para os responsáveis
-    const { data: empresas, error } = await supabase
-      .from('empresas')
-      .select(`
-        *,
-        comercial_user:usuarios!empresas_comercial_fkey(nome),
-        compliance_fiscal_user:usuarios!empresas_compliance_fiscal_fkey(nome),
-        compliance_tributario_user:usuarios!empresas_compliance_tributario_fkey(nome),
-        conciliacao_contabil_user:usuarios!empresas_conciliacao_contabil_fkey(nome),
-        contabil_user:usuarios!empresas_contabil_fkey(nome),
-        controladoria_user:usuarios!empresas_controladoria_fkey(nome),
-        financeiro_user:usuarios!empresas_financeiro_fkey(nome),
-        fiscal_user:usuarios!empresas_fiscal_fkey(nome),
-        gente_e_gestao_user:usuarios!empresas_gente_e_gestao_fkey(nome),
-        pessoal_user:usuarios!empresas_pessoal_fkey(nome),
-        folha_user:usuarios!empresas_folha_de_pagamento_kit_mensal_fkey(nome),
-        societario_user:usuarios!empresas_societario_fkey(nome),
-        sucesso_user:usuarios!empresas_sucesso_do_cliente_fkey(nome)
-      `)
-      .order('razao_social');
+    // Buscar parâmetros de busca
+    const url = new URL(req.url);
+    const search = url.searchParams.get('search') || '';
 
-    if (error) {
-      console.error('Error fetching empresas:', error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Consultar API externa
+    let apiResponse;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+      apiResponse = await fetch(API_URL, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!apiResponse.ok) {
+        throw new Error(`API retornou status ${apiResponse.status}`);
+      }
+    } catch (fetchError: any) {
+      console.error('Erro ao consultar API externa:', fetchError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Erro ao consultar API externa',
+          details: fetchError.message 
+        }), 
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    let empresas = await apiResponse.json();
+
+    // Fazer trim em todas as strings
+    empresas = trimObjectStrings(empresas);
+
+    // Aplicar filtro de busca se fornecido
+    if (search) {
+      const searchLower = search.toLowerCase();
+      empresas = empresas.filter((emp: any) => {
+        return (
+          (emp.nome_emp && emp.nome_emp.toLowerCase().includes(searchLower)) ||
+          (emp.razao_emp && emp.razao_emp.toLowerCase().includes(searchLower)) ||
+          (emp.cgce_emp && emp.cgce_emp.includes(search)) ||
+          (emp.fantasia_emp && emp.fantasia_emp.toLowerCase().includes(searchLower))
+        );
       });
     }
 
-    console.log(`Encontradas ${empresas?.length || 0} empresas`);
+    // Registrar auditoria
+    await supabase.from('auditoria').insert({
+      usuario_id: payload.sub,
+      acao: 'CONSULTA_EMPRESAS_API',
+      detalhe: {
+        api_endpoint: '/api/empresas/list',
+        search: search,
+        total_resultados: empresas.length,
+      },
+    });
+
+    console.log(`Retornadas ${empresas.length} empresas da API externa`);
 
     return new Response(JSON.stringify({ success: true, data: empresas }), {
       status: 200,

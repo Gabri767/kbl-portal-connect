@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Empresas from "./pages/Empresas";
+import EmpresaDetalhes from "./pages/EmpresaDetalhes";
 import Lancamentos from "./pages/Lancamentos";
 import Perfil from "./pages/Perfil";
 import Admin from "./pages/Admin";
@@ -47,6 +48,7 @@ const App = () => <QueryClientProvider client={queryClient}>
             <Route path="/definir-senha/:token" element={<DefinirSenha />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
+            <Route path="/empresas/:codiEmp" element={<ProtectedRoute><EmpresaDetalhes /></ProtectedRoute>} />
             <Route path="/lancamentos" element={<ProtectedRoute><Lancamentos /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />

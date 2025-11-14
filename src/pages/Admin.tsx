@@ -149,7 +149,6 @@ export default function Admin() {
                       <TableHead>Email</TableHead>
                       <TableHead>Cargo</TableHead>
                       <TableHead>Departamentos</TableHead>
-                      <TableHead>Empresas</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Data de Criação</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
@@ -172,20 +171,6 @@ export default function Admin() {
                                 {dep}
                               </Badge>
                             ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {usuario.usuarios_empresas?.slice(0, 2).map((ue: any) => (
-                              <span key={ue.empresa_id} className="text-xs">
-                                {ue.empresas?.razao_social || 'N/A'}
-                              </span>
-                            ))}
-                            {usuario.usuarios_empresas && usuario.usuarios_empresas.length > 2 && (
-                              <span className="text-xs text-muted-foreground">
-                                +{usuario.usuarios_empresas.length - 2} mais
-                              </span>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(usuario.status || 'N/A')}</TableCell>
