@@ -221,11 +221,18 @@ export default function Empresas() {
     }
 
     try {
+      // Converter strings vazias para null nos campos de data
+      const dataToSave: any = { ...formData };
+      if (dataToSave.dt_insc_municipal === '') dataToSave.dt_insc_municipal = null;
+      if (dataToSave.data_de_abertura === '') dataToSave.data_de_abertura = null;
+      if (dataToSave.cliente_desde === '') dataToSave.cliente_desde = null;
+      if (dataToSave.cliente_ate === '') dataToSave.cliente_ate = null;
+
       if (editingId) {
         // Atualizar empresa existente
         const { error } = await supabase
           .from('empresas')
-          .update(formData)
+          .update(dataToSave)
           .eq('id', editingId);
 
         if (error) throw error;
@@ -236,7 +243,7 @@ export default function Empresas() {
         });
       } else {
         // Criar nova empresa
-        const dataToInsert: any = formData.id ? formData : { ...formData, id: undefined };
+        const dataToInsert: any = formData.id ? dataToSave : { ...dataToSave, id: undefined };
         
         const { error } = await supabase
           .from('empresas')
@@ -382,7 +389,7 @@ export default function Empresas() {
               resetForm();
               setDialogOpen(true);
             }}
-            className="text-white"
+            className="bg-brand hover:bg-brand/90 text-brand-foreground"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nova Empresa
@@ -563,6 +570,128 @@ export default function Empresas() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
+                  <Label htmlFor="nire">NIRE</Label>
+                  <Input
+                    id="nire"
+                    value={formData.nire}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, nire: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="insc_municipal">Inscrição Municipal</Label>
+                  <Input
+                    id="insc_municipal"
+                    value={formData.insc_municipal}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, insc_municipal: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dt_insc_municipal">Data Insc. Municipal</Label>
+                  <Input
+                    id="dt_insc_municipal"
+                    type="date"
+                    value={formData.dt_insc_municipal}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, dt_insc_municipal: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="inscricoes_estaduais">Inscrições Estaduais</Label>
+                  <Input
+                    id="inscricoes_estaduais"
+                    value={formData.inscricoes_estaduais}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, inscricoes_estaduais: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="empresa_isenta">Empresa Isenta</Label>
+                  <Select
+                    value={formData.empresa_isenta}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, empresa_isenta: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sim">Sim</SelectItem>
+                      <SelectItem value="Não">Não</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="outros_identificadores">Outros Identificadores</Label>
+                  <Input
+                    id="outros_identificadores"
+                    value={formData.outros_identificadores}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, outros_identificadores: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="data_de_abertura">Data de Abertura</Label>
+                  <Input
+                    id="data_de_abertura"
+                    type="date"
+                    value={formData.data_de_abertura}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, data_de_abertura: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cliente_desde">Cliente Desde</Label>
+                  <Input
+                    id="cliente_desde"
+                    type="date"
+                    value={formData.cliente_desde}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, cliente_desde: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cliente_ate">Cliente Até</Label>
+                  <Input
+                    id="cliente_ate"
+                    type="date"
+                    value={formData.cliente_ate}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, cliente_ate: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="honorarios">Honorários</Label>
+                  <Input
+                    id="honorarios"
+                    value={formData.honorarios}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, honorarios: e.target.value }))}
+                    placeholder="R$"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="website_da_empresa">Website da Empresa</Label>
+                  <Input
+                    id="website_da_empresa"
+                    type="url"
+                    value={formData.website_da_empresa}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, website_da_empresa: e.target.value }))}
+                    placeholder="https://"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apelido_continuo">Apelido Contínuo</Label>
+                  <Input
+                    id="apelido_continuo"
+                    value={formData.apelido_continuo}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, apelido_continuo: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="grupo">Grupo de Empresas</Label>
                   <Select
                     value={formData.grupo_de_empresas}
@@ -633,10 +762,9 @@ export default function Empresas() {
                     />
                     <Button
                       type="button"
-                      variant="outline"
                       onClick={handleBuscarCep}
                       disabled={loadingCep}
-                      className="text-white bg-primary hover:bg-primary/90"
+                      className="bg-brand hover:bg-brand/90 text-brand-foreground"
                     >
                       {loadingCep ? 'Buscando...' : 'Buscar'}
                     </Button>
@@ -724,7 +852,7 @@ export default function Empresas() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSubmit} className="text-white">
+            <Button onClick={handleSubmit} className="bg-brand hover:bg-brand/90 text-brand-foreground">
               {editingId ? 'Atualizar' : 'Criar'} Empresa
             </Button>
           </DialogFooter>
