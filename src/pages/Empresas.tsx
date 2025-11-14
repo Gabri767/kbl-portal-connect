@@ -220,13 +220,49 @@ export default function Empresas() {
       return;
     }
 
+    // Validar CNPJ
+    const cnpjLimpo = formData.cnpj?.replace(/\D/g, '');
+    if (!cnpjLimpo || cnpjLimpo.length !== 14) {
+      toast({
+        title: 'Erro',
+        description: 'CNPJ inválido. Deve conter 14 dígitos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      // Converter strings vazias para null nos campos de data
-      const dataToSave: any = { ...formData };
-      if (dataToSave.dt_insc_municipal === '') dataToSave.dt_insc_municipal = null;
-      if (dataToSave.data_de_abertura === '') dataToSave.data_de_abertura = null;
-      if (dataToSave.cliente_desde === '') dataToSave.cliente_desde = null;
-      if (dataToSave.cliente_ate === '') dataToSave.cliente_ate = null;
+      // Converter campos vazios para null
+      const dataToSave: any = {
+        razao_social: formData.razao_social?.trim(),
+        cnpj: cnpjLimpo,
+        ativa: formData.ativa || 'Ativa',
+        nome_fantasia: formData.nome_fantasia?.trim() || null,
+        fone: formData.fone?.trim() || null,
+        regime: formData.regime?.trim() || null,
+        nire: formData.nire?.trim() || null,
+        insc_municipal: formData.insc_municipal?.trim() || null,
+        dt_insc_municipal: formData.dt_insc_municipal || null,
+        endereco: formData.endereco?.trim() || null,
+        numero: formData.numero?.trim() || null,
+        complemento: formData.complemento?.trim() || null,
+        cep: formData.cep?.trim() || null,
+        bairro: formData.bairro?.trim() || null,
+        cidade: formData.cidade?.trim() || null,
+        uf: formData.uf?.trim() || null,
+        data_de_abertura: formData.data_de_abertura || null,
+        cliente_desde: formData.cliente_desde || null,
+        cliente_ate: formData.cliente_ate || null,
+        honorarios: formData.honorarios?.trim() || null,
+        website_da_empresa: formData.website_da_empresa?.trim() || null,
+        apelido_continuo: formData.apelido_continuo?.trim() || null,
+        inscricoes_estaduais: formData.inscricoes_estaduais?.trim() || null,
+        outros_identificadores: formData.outros_identificadores?.trim() || null,
+        comentarios_e_anotacoes_gerais: formData.comentarios_e_anotacoes_gerais?.trim() || null,
+        tags: formData.tags?.trim() || null,
+        grupo_de_empresas: formData.grupo_de_empresas?.trim() || null,
+        empresa_isenta: formData.empresa_isenta?.trim() || null,
+      };
 
       if (editingId) {
         // Atualizar empresa existente
@@ -243,13 +279,30 @@ export default function Empresas() {
         });
       } else {
         // Criar nova empresa
-        const dataToInsert: any = formData.id ? dataToSave : { ...dataToSave, id: undefined };
-        
+        // Se ID customizado foi fornecido, converter para UUID usando a função do banco
+        if (formData.id?.trim()) {
+          const { data: convertedId, error: convertError } = await supabase
+            .rpc('convert_to_uuid', { input_text: formData.id.trim() });
+
+          if (convertError) throw convertError;
+          dataToSave.id = convertedId;
+        }
+
         const { error } = await supabase
           .from('empresas')
-          .insert([dataToInsert]);
+          .insert([dataToSave]);
 
-        if (error) throw error;
+        if (error) {
+          if (error.code === '23505') {
+            toast({
+              title: 'Erro',
+              description: 'CNPJ já cadastrado no sistema.',
+              variant: 'destructive',
+            });
+            return;
+          }
+          throw error;
+        }
 
         toast({
           title: 'Sucesso',
@@ -309,13 +362,10 @@ export default function Empresas() {
     if (!confirm('Tem certeza que deseja excluir esta empresa?')) return;
 
     try {
-      const token = localStorage.getItem('auth_token');
-      const { error } = await supabase.functions.invoke('empresas-delete', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: { id },
-      });
+      const { error } = await supabase
+        .from('empresas')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 
