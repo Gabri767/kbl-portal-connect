@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Usuarios from "./pages/Usuarios";
 import ConvidarUsuario from "./pages/ConvidarUsuario";
 import DefinirSenha from "./pages/DefinirSenha";
+import RecuperarSenha from "./pages/RecuperarSenha";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 const ProtectedRoute = ({
@@ -45,6 +46,7 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/recuperar-senha" element={<RecuperarSenha />} />
             <Route path="/definir-senha/:token" element={<DefinirSenha />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/empresas" element={<ProtectedRoute><Empresas /></ProtectedRoute>} />
