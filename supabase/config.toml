@@ -15,17 +15,11 @@ verify_jwt = false
 [functions.auth-invite-user]
 verify_jwt = true
 
-[functions.empresas-sync]
+[functions.enviar-codigo-recuperacao]
 verify_jwt = false
 
-[functions.empresas-create]
-verify_jwt = true
-
-[functions.empresas-update]
-verify_jwt = true
-
-[functions.empresas-delete]
-verify_jwt = true
+[functions.reset-senha]
+verify_jwt = false
 
 [functions.empresas-list]
 verify_jwt = true
